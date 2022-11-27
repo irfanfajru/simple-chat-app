@@ -26,8 +26,20 @@ io.on("connection", (socket) => {
 
   // listen message
   socket.on("message", (message) => {
+    message.date = new Date().toLocaleString();
     console.log(message);
     io.emit("message", message);
+  });
+
+  // is typing
+  socket.on("typing", (user) => {
+    console.log(`${user} is typing...`);
+    io.emit("typing", user);
+  });
+
+  // stop typing
+  socket.on("stop-typing", (user) => {
+    io.emit("stop-typing", user);
   });
 });
 

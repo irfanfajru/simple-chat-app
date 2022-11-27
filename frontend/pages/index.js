@@ -17,6 +17,7 @@ export default function Home() {
   const [messages, setMessages] = useState([]);
   const [nickname, setNickname] = useState(randomName);
   const [inputText, setInputText] = useState("");
+  const [whoIsTyping, setWhoIsTyping] = useState("");
 
   useEffect(() => {
     socket.on("connect", () => {
@@ -26,13 +27,23 @@ export default function Home() {
       console.log("disconnect");
     });
     socket.on("message", (val) => {
+      setWhoIsTyping("");
       setMessages([...messages, val]);
+    });
+
+    socket.on("typing", (val) => {
+      if (val != nickname) setWhoIsTyping(`${val} is typing...`);
+    });
+
+    socket.on("stop-typing", (val) => {
+      setWhoIsTyping("");
     });
 
     return () => {
       socket.off("connect");
       socket.off("disconnect");
       socket.off("message");
+      socket.off("typing");
     };
   });
 
@@ -43,6 +54,7 @@ export default function Home() {
       from: nickname,
       message: inputText,
     });
+    socket.emit("stop-typing", nickname);
     setInputText("");
   };
   return (
@@ -88,12 +100,16 @@ export default function Home() {
                     }
                     key={index}
                   >
-                    <p>
-                      {e.from == nickname ? "You" : e.from} <br></br>
+                    <p className="text-break">
+                      <strong>{e.from == nickname ? "You" : e.from}</strong>{" "}
+                      <br></br>
                       {e.message}
+                      <br></br>
+                      <p>{e.date}</p>
                     </p>
                   </div>
                 ))}
+                {whoIsTyping}
                 {/* input text */}
                 <form onSubmit={sendMessage}>
                   <div>
@@ -102,7 +118,16 @@ export default function Home() {
                         <input
                           required
                           value={inputText}
-                          onChange={(e) => setInputText(e.target.value)}
+                          onChange={(e) => {
+                            socket.emit("typing", nickname);
+                            setInputText(e.target.value);
+                          }}
+                          onKeyUp={(e) => {
+                            setTimeout(() => {
+                              socket.emit("stop-typing", nickname);
+                              setWhoIsTyping("");
+                            }, 5000);
+                          }}
                           type="text"
                           className="form-control"
                           placeholder="Type a message"

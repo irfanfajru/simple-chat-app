@@ -11,7 +11,7 @@ const {
 const randomName = uniqueNamesGenerator({
   dictionaries: [adjectives, colors, animals],
 });
-const socket = io("ws://192.168.12.47:3001");
+const socket = io(process.env.NEXT_PUBLIC_WEBSOCKET_URI);
 
 export default function Home() {
   const [messages, setMessages] = useState([]);
@@ -105,7 +105,7 @@ export default function Home() {
                       <br></br>
                       {e.message}
                       <br></br>
-                      <p>{e.date}</p>
+                      {e.date}
                     </p>
                   </div>
                 ))}

@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const http = require("http");
@@ -43,6 +44,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(3001, () => {
-  console.log("listerning on *:3001");
+server.listen(process.env.SERVER_PORT, () => {
+  console.log(`Listening on *:${process.env.SERVER_PORT}`);
 });
